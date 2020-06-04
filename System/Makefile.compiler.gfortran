@@ -1,6 +1,6 @@
 #==== gfortran (current version: gcc 4.5) ====
-FC = gfortran
-#FC = mpif90
+FC = gfortran # For Serial
+#FC = mpif90 # For Parallel
 
 #-- opt or debug
 FCFLAGS = -O3 
