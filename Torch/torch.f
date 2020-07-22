@@ -31,40 +31,8 @@ c..for density and temperature loops
 
 
 c..initialize the network 
-10     write(6,*) 'reading isotope data from bdat'
+      write(6,*) 'reading isotope data from bdat'
 
-      if(runid .eq. 0) then
-         narg = command_argument_count()
-         if(narg>0) then
-          do counter = 1, narg-1
-            call get_command_argument(counter,string)
-             select case(adjustl(string))
-               case("--initial","-i")
-                 call get_command_argument(counter+1,string)
-                 write(*,*), "Initial chosen to be: ",string
-                 string = trim(adjustl(string))
-                 read(string,'(i10)') runid
-                 runid = runid - 1
-               case("--final","-f")
-                 call get_command_argument(counter+1,string)
-                 write(*,*), "Final chosen to be: ",string
-                 string = trim(adjustl(string))
-                 read(string,'(i10)') runln
-             end select
-          end do
-         end if
-      end if
-      ! convert runid to character and increment runid
-      runid     = runid + 1
-      write(idch, '(i10)') runid
-      idch = trim(adjustl(idch))
-      write(*,*), '*****************************'
-      write(*,*), '--------------------RUN # ',idch
-      write(*,*), '*****************************'
-
-      if(runid .gt. runln) then
-      stop 'normal termination'
-      endif
 c       call zet47
 c       call zet76
 c       call zet127
@@ -82,7 +50,41 @@ c       call zet5
 
 
 c..keep coming back to here, get the users input
+10    continue
 
+      if(runid .eq. 0) then
+       narg = command_argument_count()
+       if(narg>0) then
+        do counter = 1, narg-1
+          call get_command_argument(counter,string)
+           select case(adjustl(string))
+             case("--initial","-i")
+               call get_command_argument(counter+1,string)
+               write(*,*), "Initial chosen to be: ",string
+               string = trim(adjustl(string))
+               read(string,'(i10)') runid
+               runid = runid - 1
+             case("--final","-f")
+               call get_command_argument(counter+1,string)
+               write(*,*), "Final chosen to be: ",string
+               string = trim(adjustl(string))
+               read(string,'(i10)') runln
+           end select
+        end do
+       end if
+      end if
+    ! convert runid to character and increment runid
+      runid     = runid + 1
+      write(idch, '(i10)') runid
+      idch = trim(adjustl(idch))
+      write(*,*), '*****************************'
+      write(*,*), '--------------------RUN # ',idch
+      write(*,*), '*****************************'
+
+      if(runid .gt. runln) then
+      stop 'normal termination'
+      endif
+     
       call net_input(tstart,tstep,tin,din,vin,zin,ein,xin)
 
 
