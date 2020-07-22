@@ -24,10 +24,10 @@ c..for density and temperature loops
       double precision dhi,dlo,den_step,thi,tlo,temp_step
 
       character*80 :: idch, string
-      integer      :: runid = 0, runid_old
-      integer      :: runln, init, narg, counter
+      integer      :: loop = 0, startid_old
+      integer      :: stopid, init, narg, counter
 
-      common runid, runln, idch, runid_old, init
+      common startid, stopid, idch, startid_old, init
 
 
 c..initialize the network 
@@ -37,7 +37,7 @@ c       call zet47
 c       call zet76
 c       call zet127
 c       call zet200
-       call zet225
+      call zet225
 c       call zet383
 c       call zet489
 c       call zet513
@@ -45,46 +45,49 @@ c       call zet3302
 c       call zet5
 
 
-       call init_torch
+      call init_torch
 
+      if(loop .eq. 0) then
+           narg = command_argument_count()
+              if(narg>0) then
+               do counter = 1, narg-1
+                 call get_command_argument(counter,string)
+                  select case(adjustl(string))
+                    case("--initial","-i")
+                      call get_command_argument(counter+1,string)
+                      write(*,*), "Initial chosen to be: ",string
+                      string = trim(adjustl(string))
+                      read(string,'(i10)') startid
+                     !  startid = startid - 1
+                    case("--final","-f")
+                      call get_command_argument(counter+1,string)
+                      write(*,*), "Final chosen to be: ",string
+                      string = trim(adjustl(string))
+                      read(string,'(i10)') stopid
+                  end select
+               end do
+              end if
+             end if
+       !      convert startid to character and increment startid
+       !        startid     = startid + 1
+       !       write(idch, '(i10)') startid
+       !       idch = trim(adjustl(idch))
+       !       write(*,*), '*****************************'
+       !       write(*,*), '--------------------RUN # ',idch
+       !       write(*,*), '*****************************'
+       
 
 
 c..keep coming back to here, get the users input
 10    continue
 
-      if(runid .eq. 0) then
-       narg = command_argument_count()
-       if(narg>0) then
-        do counter = 1, narg-1
-          call get_command_argument(counter,string)
-           select case(adjustl(string))
-             case("--initial","-i")
-               call get_command_argument(counter+1,string)
-               write(*,*), "Initial chosen to be: ",string
-               string = trim(adjustl(string))
-               read(string,'(i10)') runid
-               runid = runid - 1
-             case("--final","-f")
-               call get_command_argument(counter+1,string)
-               write(*,*), "Final chosen to be: ",string
-               string = trim(adjustl(string))
-               read(string,'(i10)') runln
-           end select
-        end do
-       end if
-      end if
-    ! convert runid to character and increment runid
-      runid     = runid + 1
-      write(idch, '(i10)') runid
+      write(idch, '(i10)') startid
       idch = trim(adjustl(idch))
       write(*,*), '*****************************'
       write(*,*), '--------------------RUN # ',idch
       write(*,*), '*****************************'
-
-      if(runid .gt. runln) then
-      stop 'normal termination'
-      endif
-     
+      
+      
       call net_input(tstart,tstep,tin,din,vin,zin,ein,xin)
 
 
@@ -204,9 +207,15 @@ c        enddo
 c       enddo
 c       close(unit=44)
 
-c..back for more
+      startid = startid + 1
+      if(startid .gt. stopid) then
+       stop 'normal termination'
+      endif
+       
+c..back for more      
       goto 10
-      end      
+      end
+
 
 
 
@@ -17113,8 +17122,8 @@ c..declare the pass
       double precision tstart,tstep,tin,din,vin,zin,ein,xin(*)
 
       character*80  :: idch
-      integer       :: runid, runln
-      common runid, runln, idch
+      integer       :: startid, stopid
+      common startid, stopid, idch
 
 
 c..local variables
@@ -17183,6 +17192,8 @@ c..get the burn type
 
       ibtype = 9
       write(6,01) 'temp-dens trajectory mode chosen'
+      p_hist_self_heat = .false.
+      
       !read(5,*)  ibtype
       !if (ibtype .lt. 0 .or. ibtype .gt. 10) goto 10
 
