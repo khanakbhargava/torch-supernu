@@ -25,7 +25,7 @@ c..for density and temperature loops
 
       character*80 :: idch, string
       integer      :: loop = 0, startid_old
-      integer      :: stopid, init, narg, counter
+      integer      :: startid, stopid, init, narg, counter
 
       common startid, stopid, idch, startid_old, init
 
@@ -145,39 +145,39 @@ c..re-start the clock
 
 c..burn it
 
-      if (p_hist_self_heat) then
+      !if (p_hist_self_heat) then
 c      the derivatives (of pressure) are discontinuous at
 c       the gridpoints of the history track, so we integrate
 c       each segment consecutively
 c       TODO trho_hist should do this too, but it doesn't currently
 c            use the T derivative
-       do i=1,ntime-1
-        curint = i
-        tstart = ztime(i)
-        tstep = ztime(i+1)
-        if (i.gt.1) then
-         tin=tout
-         din=dout
-         ein=eout
-         zin=zout
-         do j=1,ionmax
-          xin(j)=xout(j)
-         enddo
-        endif
+       !do i=1,ntime-1
+        !curint = i
+        !tstart = ztime(i)
+        !tstep = ztime(i+1)
+        !if (i.gt.1) then
+         !tin=tout
+         !din=dout
+         !ein=eout
+         !zin=zout
+         !do j=1,ionmax
+          !xin(j)=xout(j)
+         !enddo
+        !endif
+        !call burner(tstart,tstep,
+     1   !           tin,din,vin,zin,ein,xin,
+     2  !            tout,dout,zout,eout,xout,
+     3    !          conserv,nok,nbad)
+
+       !enddo
+      !else
+
         call burner(tstart,tstep,
      1              tin,din,vin,zin,ein,xin,
      2              tout,dout,zout,eout,xout,
      3              conserv,nok,nbad)
 
-       enddo
-      else
-
-        call burner(tstart,tstep,
-     1              tin,din,vin,zin,ein,xin,
-     2              tout,dout,zout,eout,xout,
-     3              conserv,nok,nbad)
-
-      endif
+      !endif
 
 
 c..output a summary of the integration, and decay the composition
@@ -17472,9 +17472,9 @@ c..transfer the info stored in xsum and zsum from the update2 call
 
       if (trho_hist) then
        call update2(tstart,tin,din)
-       do i=1,ionmax
-        xin(i) = xsum(i)
-       enddo
+      ! do i=1,ionmax
+       ! xin(i) = xsum(i)
+       !enddo
        tstart     = zwork1(1)
        tstep      = zwork1(2)
        zye        = zwork1(3)
@@ -34136,7 +34136,7 @@ c..general options
 
 c..printing information
       iprint_files  = 1
-      iprint_screen = 1
+      iprint_screen = 0
 
 
 c..inititailize the burn type logicals
