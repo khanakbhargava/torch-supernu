@@ -81,13 +81,13 @@ c       call zet5
 c..keep coming back to here, get the users input
 10    continue
 
+      init = 0
       write(idch, '(i10)') startid
       idch = trim(adjustl(idch))
       write(*,*), '*****************************'
       write(*,*), '--------------------RUN # ',idch
       write(*,*), '*****************************'
-      
-      
+
       call net_input(tstart,tstep,tin,din,vin,zin,ein,xin)
 
 
@@ -145,39 +145,39 @@ c..re-start the clock
 
 c..burn it
 
-      !if (p_hist_self_heat) then
+      if (p_hist_self_heat) then
 c      the derivatives (of pressure) are discontinuous at
 c       the gridpoints of the history track, so we integrate
 c       each segment consecutively
 c       TODO trho_hist should do this too, but it doesn't currently
 c            use the T derivative
-       !do i=1,ntime-1
-        !curint = i
-        !tstart = ztime(i)
-        !tstep = ztime(i+1)
-        !if (i.gt.1) then
-         !tin=tout
-         !din=dout
-         !ein=eout
-         !zin=zout
-         !do j=1,ionmax
-          !xin(j)=xout(j)
-         !enddo
-        !endif
-        !call burner(tstart,tstep,
-     1   !           tin,din,vin,zin,ein,xin,
-     2  !            tout,dout,zout,eout,xout,
-     3    !          conserv,nok,nbad)
+       do i=1,ntime-1
+        curint = i
+        tstart = ztime(i)
+        tstep = ztime(i+1)
+        if (i.gt.1) then
+         tin=tout
+         din=dout
+         ein=eout
+         zin=zout
+         do j=1,ionmax
+          xin(j)=xout(j)
+         enddo
+        endif
+        call burner(tstart,tstep,
+     1              tin,din,vin,zin,ein,xin,
+     2              tout,dout,zout,eout,xout,
+     3              conserv,nok,nbad)
 
-       !enddo
-      !else
+       enddo
+       else
 
         call burner(tstart,tstep,
      1              tin,din,vin,zin,ein,xin,
      2              tout,dout,zout,eout,xout,
      3              conserv,nok,nbad)
 
-      !endif
+      endif
 
 
 c..output a summary of the integration, and decay the composition
@@ -236,7 +236,7 @@ c..burned composition xout, final temperature tout, final density dout,
 c..and the final thermal energy eout.
 
 c..declare the pass
-      integer          nok,nbad
+      integer          nok,nbad,init
       double precision beg,tstep,tin,din,vin,zin,ein,xin(*),
      1                 tout,dout,zout,eout,xout(*),conserv
 
@@ -16677,7 +16677,7 @@ c..kount    = total number of steps taken
 
 c..declare the pass
       external         derivs,jakob,bjakob,steper 
-      integer          ylogi,nok,nbad,kount
+      integer          ylogi,nok,nbad,kount, startid
       double precision start,stptry,stpmin,stopp,bc(ylogi),eps,
      1                 odescal
 
@@ -16723,14 +16723,14 @@ c..for nse
       integer          igues,nse_switch
       double precision xmun,xmup
 
-
+      common startid
 
 c..here are the format statements for printouts as we integrate 
 100   format(1x,i6,' ',a,a,1pe11.4,a,a,a,1pe11.4,
      1          3(a6,1pe10.3),5(a5,1pe9.2))
 101   format(1x,1p12e10.2) 
 
-
+      
 
 c..initialize    
       if (ylogi  .gt. nmax) stop 'ylogi > nmax in routine netint' 
@@ -17456,7 +17456,7 @@ c..set the density from the temperature and eta1
 c..thermodynamic profile being given
       else if (trho_hist .or. pt_hist .or. p_hist_self_heat) then
        write(6,*) 'give the trajectory file =>'
-       trho_file = "history/traj_" // idch
+       trho_file = "history/tempdens" // idch
        trho_file = trim(adjustl(trho_file)) // ".dat"
        write(*,*), 'The temp-dens trajectory file for this run is:',
      1 trho_file
@@ -22467,11 +22467,13 @@ c..declare the pass
       integer          kount
       double precision x,y(*)
 
+      common startid
 
 c..local variables
+
       character*8      atim
       character*9      adat
-      character*80     string
+      character*80     string, final
       integer          k,kk,j,lop,ilop,jrem,kb,ke,nn,lenstr,loop,counter
       double precision sum,xcons,ycons,yex,ydum(abignet),
      1                 dydt_dum(nzmax*abignet),xdum(abignet),
@@ -22480,12 +22482,14 @@ c..local variables
      4                 chem_pot(nzmax*abignet),chem_sum,
      5                 ydum_sav(nzmax*abignet)
       parameter        (zero = 0.0d0)
+      double precision  yfinal
+      save yfinal
 
 
 c..for nse
       integer          igues
       double precision xmun,xmup,t9,tau_nse,tau_qse,taud
-      integer          init
+      integer          init,startid
       data             init/0/
 
       double precision xnse,xnsqe
@@ -22500,20 +22504,18 @@ c..popular format statements
 07    format(1x,'* ',a,4(a,1pe11.3))
 08    format(1x,i6,1p3e24.16,1p10e14.6)
 
-
-
 c      write(6,*) kount,neqs,nzone
 
 c..initialize the files with their headers
-      if (kount .eq. 1 .and. init.eq.0) then
-       init=1
+c      if (kount .eq. 1 .and. init.eq.0) then
+c       init=1
 
 
 
 c..for every spatial zone
        do k=1,max(1,nzone)
         kk = neqs*(k-1)
-
+        
 c..logical unit 40 records the energetics
         write(string,03) hfile,0,'_z',k,'.dat'
         call sqeeze(string)
@@ -22827,7 +22829,7 @@ c..end of the spatial loop and nse analyis test if
 c       write(6,*) 'wrote mass fraction headers'
 
 c..end of the file initialization
-      end if
+c      end if
 
 c      write(6,*) 'done with initialization'
 
@@ -23010,7 +23012,18 @@ c       close(unit=41)
 
 c..end of spatial loop 
       end do
+ 
+      yfinal = yex
+        
+!  12    format(a,'final.dat')
+! 05    format(1x,i6,1pe20.12,1p12e14.6)
 
+!      write(final,12) hfile(1:lenstr(hfile,80))
+!      call sqeeze(final)
+!      open(unit=51,file=final,status='unknown')
+
+!     write(51,08) yex     
+!     close(unit=51)
 
 c      write(6,*) 'done with thermo file'
 
@@ -23043,13 +23056,14 @@ c        open (unit=ilop+41, file=string, status='old', position='append')
 c        write(34,04) kount,x,(y(nn+kk), nn=kb,ke)
 
 c        close(unit=34)
+c        close(unit=(ilop+41))
 70      continue
        enddo
 
 
 c..end of spatial zone loop
       enddo
-
+      
 c      write(6,*) 'done with mass fractions file'
 
 
@@ -23208,7 +23222,7 @@ c---------------------------------------------------------------------
 c..writes out the final composition
 
 c..declare the pass
-      double precision xout(*)
+      double precision xout(*),yfinal
 
 c..local variables
       character*80     final
@@ -23217,6 +23231,7 @@ c..local variables
 c..popular format statements
  01   format(a,'final.dat')
  02   format(1x,i4,i4,1pe14.6,a6)
+ 08   format(1x,i6,1p3e24.16,1p10e14.6)
 
 
 
@@ -23224,7 +23239,7 @@ c..for the file name and open it
       write(final,01) hfile(1:lenstr(hfile,80))
       call sqeeze(final)
       open(unit=51,file=final,status='unknown')
-
+      write(51,08) yfinal
 
 c..convert to integers
       do i=1,ionmax
@@ -23274,12 +23289,12 @@ c..interpolation (2 points = linear, 3 = quadratic ...)
 
       character*80     string,word
       integer          ipos,getnam,kiso
-      double precision value
+      double precision x,value
       integer          t(ntmax)
 
       integer          init
       data             init/0/
-      character(2)     x
+   
 
 c..stuff to do once
      
@@ -23315,8 +23330,7 @@ c for slab
 c        read(17,*,end=10) ztime(i),x,zden(i),x,x,x,x,x,x,
 c     1      x,x,x,x,x,ztemp(i),x,x,x,x
 c for star
-       read(17,*,end=10) ztime(i), zden(i), x ,x ,x ,
-     c  ztemp(i)
+       read(17,*,end=10) ztime(i), ztemp(i), zden(i)
         ntime = ntime + 1
        enddo
        stop 'more than ntmax points in update2'
@@ -34136,7 +34150,7 @@ c..general options
 
 c..printing information
       iprint_files  = 1
-      iprint_screen = 0
+      iprint_screen = 1
 
 
 c..inititailize the burn type logicals
@@ -35507,9 +35521,9 @@ c..declare
      2                 xest,xnew,a(imax),alf(kmaxx,kmaxx),err(kmaxx),
      3                 yerr(nmax),ysav(nmax),yseq(nmax),safe1,safe2,
      4                 redmax,redmin,tiny,scalmx,dum
-      parameter        (safe1 = 0.25d0, safe2 = 0.7d0, redmax=1.0d-5,
-     1                  redmin = 0.7d0, tiny = 1.0d-30, 
-     2                  scalmx = 0.1d0)
+      parameter        (safe1 = 0.25d0, safe2 = 0.7d0, redmax=1.0d-7,
+     1                  redmin = 0.1d0, tiny = 1.0d-30, 
+     2                  scalmx = 0.5d0)
 c     2                  scalmx = 0.5d0)
 c     2                  scalmx = 0.3d0)
 c     2                  scalmx = 0.2d0)
@@ -35520,6 +35534,13 @@ c..for jacobian pictures
       character*20     string
       integer          nstp,ifirst,j
       double precision ans13(13,13),anydt(13),sum
+
+      character*80  :: idch
+      integer       :: startid, init
+      integer       :: stopid, yellow_flag
+      
+       common      startid, stopid, idch, yellow_flag
+
 
 
 c..for the ma28 package
@@ -35699,7 +35720,7 @@ c       write(6,*) k
 
        xnew = x + h
        if (xnew .eq. x) stop 'step too small in routine stifbs_ma28'
-
+                   
        call simpr_ma28(ysav,dydx,nv,x,h,nseq(k),yseq,derivs,nstp) 
        xest = (h/nseq(k))**2 
        call net_pzextr(k,xest,yseq,y,yerr,nv) 
