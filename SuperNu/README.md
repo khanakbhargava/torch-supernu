@@ -1,1 +1,1 @@
-This repository contains the source codes for Torch and SuperNu. 
+This directory contain the sorce code for SuperNu.
