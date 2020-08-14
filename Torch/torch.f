@@ -22483,8 +22483,8 @@ c..local variables
      5                 ydum_sav(nzmax*abignet)
       parameter        (zero = 0.0d0)
       double precision  yfinal
-      save yfinal
-
+     
+   
 
 c..for nse
       integer          igues
@@ -23013,8 +23013,7 @@ c       close(unit=41)
 c..end of spatial loop 
       end do
  
-      yfinal = yex
-        
+     
 !  12    format(a,'final.dat')
 ! 05    format(1x,i6,1pe20.12,1p12e14.6)
 
@@ -23062,8 +23061,7 @@ c        close(unit=(ilop+41))
 
 
 c..end of spatial zone loop
-      enddo
-      
+      enddo 
 c      write(6,*) 'done with mass fractions file'
 
 
@@ -23200,8 +23198,6 @@ c..end of spatial zone loop
 
 c..end of the nse analysis if
       end if
-
-
 
       return
       end
