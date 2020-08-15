@@ -22482,7 +22482,7 @@ c..local variables
      4                 chem_pot(nzmax*abignet),chem_sum,
      5                 ydum_sav(nzmax*abignet)
       parameter        (zero = 0.0d0)
-      double precision  yfinal
+     
      
    
 
@@ -23218,7 +23218,7 @@ c---------------------------------------------------------------------
 c..writes out the final composition
 
 c..declare the pass
-      double precision xout(*),yfinal
+      double precision xout(*)
 
 c..local variables
       character*80     final
@@ -23235,7 +23235,6 @@ c..for the file name and open it
       write(final,01) hfile(1:lenstr(hfile,80))
       call sqeeze(final)
       open(unit=51,file=final,status='unknown')
-      write(51,08) yfinal
 
 c..convert to integers
       do i=1,ionmax
