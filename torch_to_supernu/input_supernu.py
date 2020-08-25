@@ -59,11 +59,14 @@ for i in range(64):
        sabund = np.zeros([1,30], dtype = float) #Resetting sum of abundances for every cell
        x_left = x[j]
        x_right = x[j+1]
+       count = 0 # Keeps track of no of particle in each velocity bin.
        for k in range(Np):
             if(data[0][k] >= x_left and data[0][k] < x_right) and (data[1][k] >= y_left and data[1][k] < y_right): #Checking if particle fits the range of cell
                smass += mass #Mass of cell will increase with addition of a particle
+               count += 1
                for l in range(30):
                   sabund[0][l] += data[l+2][k]
+       sabund = sabund / count           
        f.write('%e %e %e %e %e' %(x_left, x_right, y_left, y_right,smass))
        np.savetxt(f, sabund, fmt =' %1.5e')
 f.close()
