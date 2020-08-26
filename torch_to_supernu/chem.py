@@ -3,7 +3,11 @@
 
 import numpy as np
     
-nfiles = 10002 #No. of total particles to be mapped
+nfiles = 1 #No. of total particles to be mapped
+
+nelements = 32 # No. of elements to be included
+
+nisotopes = 6 # No. of isotopes to be included
 
 fin = open('abundance.dat','ab')
 
@@ -16,9 +20,10 @@ for f in range(nfiles):
     baryon_number = [] # Array to store baryon number
     mass_fraction = [] # Arrya to store mass fraction
     isotope_array = [] # 2D array with indices of isotopes grouped together
+    atomic_number_array = []
     baryon_number_array = [] # 2D array with baryon number grouped together
     mass_fraction_array = [] # 2D array with mass fraction grouped together
-    all_mass_fraction = np.zeros(30) # output from the function (mass fractions)
+    all_mass_fraction = np.zeros(int(nelements + nisotopes)) # output from the function (mass fractions)
 
 
     for line in file_length: # Loop over all the lines
@@ -31,7 +36,7 @@ for f in range(nfiles):
 
     atomic_number = np.array(atomic_number) # Convert to numoy array
                 
-    for i in range(32):
+    for i in range(nelements):
         array = np.where(atomic_number == i+1) # Find the elements with specific atomic number
         isotope_array.append(array[0]) # Genertaing a 2D list
         
@@ -42,32 +47,45 @@ for f in range(nfiles):
     # isotope_array[0] = isotope_array[0][:-1]
     # print(isotope_array[0])
 
-    for a in range(32): # Specifies the atomic number of element
+    for a in range(nelements): # Specifies the atomic number of element
+        empty_atomic = []
         empty_baryon = [] # List to store Baryon number array for paticular element
         empty_fraction = [] # List yo store mass fraction array for paticular element
         
         for b in isotope_array[a]:
+            empty_atomic.append(atomic_number[b])
             empty_baryon.append(baryon_number[b]) 
             empty_fraction.append(mass_fraction[b])
             
+        atomic_number_array.append(np.array(empty_atomic))    
         baryon_number_array.append(np.array(empty_baryon)) # 2D list being created
         mass_fraction_array.append(np.array(empty_fraction)) # 2D list being created
-
+        
+    atomic_number_array = np.array(atomic_number_array, dtype = object)
     baryon_number_array = np.array(baryon_number_array, dtype = object) # Convert to numpy array
     mass_fraction_array = np.array(mass_fraction_array, dtype = object) # Convert to numpy array
 
     #########################################################################################
-    for j in range(28):    # JUst need first 28 elemnets
-        all_mass_fraction[j] = (sum(baryon_number_array[j]*\
-                                    mass_fraction_array[j]))\
-                                /sum(baryon_number_array[j])
-            
+    for j in range(nelements):    # Storing all the 32 elements
+        #all_mass_fraction[j] = (sum(atomic_number_array[j]*\
+        #                           mass_fraction_array[j]))\
+        #                       /sum(atomic_number_array[j])
+        all_mass_fraction[j] = sum(mass_fraction_array[j])
+    # Above change was made beacuse in input, we need Ni > Ni56        
             
     ##########################################################################################  
-    # Store Ni 56 and Co 56 in the array
-    all_mass_fraction[28] = mass_fraction_array[27][0]
-    all_mass_fraction[29] = mass_fraction_array[26][1]
+    # Store Ni 56, Co 56, Fe 52, Mn 52, Cr 48, and V 48 in the array
+    # As nisotopes = 6
+    all_mass_fraction[32] = mass_fraction_array[27][0]
+    all_mass_fraction[33] = mass_fraction_array[26][1]
+    all_mass_fraction[34] = mass_fraction_array[25][0]
+    all_mass_fraction[35] = mass_fraction_array[24][1]
+    all_mass_fraction[36] = mass_fraction_array[23][0]
+    all_mass_fraction[37] = mass_fraction_array[22][3]
+    
     np.savetxt(fin,all_mass_fraction, newline=' ', delimiter= ',')
     fin.write(b"\n")
-   
+    
 fin.close()
+#print(all_mass_fraction)
+#print(sum(all_mass_fraction[:-6]))
