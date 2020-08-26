@@ -1,13 +1,13 @@
 import numpy as np
 import maxmin as mm
 
-Np = 100  #Number of trajectories/particles we want to map
+Np = 10002  #Number of trajectories/particles we want to map
 tmass = 2.746198879885638517E+33 #Total mass of the system
-mass = tmass/10000 # Mass of one particle
+mass = tmass/10002 # Mass of one particle
 
 data = np.zeros([32, Np], dtype = float) #This array will store velocities and abundances for all Np particles
 
-f = open('flash.dat','r')
+f = open('final_vel.dat','r')
 for i in range(Np):
       line = f.readline()
       lst = line.split()
@@ -16,16 +16,18 @@ for i in range(Np):
 f.close()
 
 f = open('abundance.dat','r')
+f.readline()
 for i in range(Np):
     line = f.readline()
     lst = line.split()
+    #print(lst)
     for j in range(30):
         data[j+2][i] = float(lst[j]) #Reading 30 abundances for all Np particles
 f.close()
 
 
 arr = []
-arr = mm.maxmin('flash.dat') #This will find the max and min velocities that will fix the range for x and y axes of the mesh
+arr = mm.maxmin('final_vel.dat') #This will find the max and min velocities that will fix the range for x and y axes of the mesh
 
 vr_max = arr[0]
 vz_max = arr[1]
@@ -33,9 +35,6 @@ vz_min = arr[2]
 
 x = np.linspace(0, vr_max, 33)
 y = np.linspace(vz_min, vz_max, 65)
-
-print(x)
-print(y)
 
 
 f = open('input.str','w')
@@ -66,7 +65,8 @@ for i in range(64):
                count += 1
                for l in range(30):
                   sabund[0][l] += data[l+2][k]
-       sabund = sabund / count           
+       if(count != 0):
+            sabund = sabund / count 
        f.write('%e %e %e %e %e' %(x_left, x_right, y_left, y_right,smass))
        np.savetxt(f, sabund, fmt =' %1.5e')
 f.close()
