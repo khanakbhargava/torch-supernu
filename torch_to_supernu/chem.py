@@ -3,22 +3,23 @@
 
 import numpy as np
     
-atomic_number = [] # Array stores the atomic numbers
-baryon_number = [] # Array to store baryon number
-mass_fraction = [] # Arrya to store mass fraction
-isotope_array = [] # 2D array with indices of isotopes grouped together
-baryon_number_array = [] # 2D array with baryon number grouped together
-mass_fraction_array = [] # 2D array with mass fraction grouped together
-all_mass_fraction = np.zeros(30) # output from the function (mass fractions)
+nfiles = 10002 #No. of total particles to be mapped
 
-nfiles = 100
-
-fin = open('abundance.dat'.'w')
+fin = open('abundance.dat','ab')
 
 for f in range(nfiles):
     filename = 'out_' + str(f+1) + '_final.dat'
-    file = open(filename,"r") # Open teh file
+    file = open(filename,"r") # Open the file
     file_length = file.readlines() #Array of lines in file
+
+    atomic_number = [] # Array stores the atomic numbers
+    baryon_number = [] # Array to store baryon number
+    mass_fraction = [] # Arrya to store mass fraction
+    isotope_array = [] # 2D array with indices of isotopes grouped together
+    baryon_number_array = [] # 2D array with baryon number grouped together
+    mass_fraction_array = [] # 2D array with mass fraction grouped together
+    all_mass_fraction = np.zeros(30) # output from the function (mass fractions)
+
 
     for line in file_length: # Loop over all the lines
         lst = line.split() # Split each line into a list
@@ -66,6 +67,7 @@ for f in range(nfiles):
     # Store Ni 56 and Co 56 in the array
     all_mass_fraction[28] = mass_fraction_array[27][0]
     all_mass_fraction[29] = mass_fraction_array[26][1]
-    fin.write(all_mass_fraction)
-
+    np.savetxt(fin,all_mass_fraction, newline=' ', delimiter= ',')
+    fin.write(b"\n")
+   
 fin.close()
