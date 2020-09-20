@@ -1,15 +1,17 @@
-# A short script to plot the time-dependent spectrum from supernu
+#short script to plot the time-dependent spectrum from supernu
 
 # plot_spectrum_supernu.py
 
 import math
 import numpy as np
+import matplotlib
+#matplotlib.use('Agg') #Uncomment this to run on Stampede
 import matplotlib.pyplot as plt
 
 # Verbosity flag (set to verbose by default)
 
 verbose = 1
-line_toread = 24
+line_toread = 17
 
 # Open the ASCII file containing the time information
 
@@ -21,12 +23,12 @@ for line in f:
         strippedline = line.strip()
         if strippedline.startswith("#") :
                 if (verbose == 1) :
-                        print line,
+                        print(line),
         else :
 # Split the line of data into fields
                 lst = line.split()
 # Convert line information from ASCII to floats
-		times.append (float (lst [0]))
+                times.append(float(lst[0]))
 f.close ()
 
 # Open the ASCII file containing the wavelength information
@@ -54,13 +56,13 @@ wavearr = np.asarray (wavelength) * 1.e8
 
 f = open ('output.flx_luminos')
 
-spec = [None] * 150
+spec = [None] * 500
 j = 0
 
 for line in f:
 	if line.startswith("#") :
 		if (verbose == 1) :
-			print line,
+			print(line),
 	else :
 # Split the line of data into fields
 		lst = line.split()
@@ -73,16 +75,17 @@ for line in f:
 specarray = np.asarray (spec [line_toread] )
 #specarray = np.log (specarray) / math.log (10.)
 
-print "Size of spec array = ", len (spec [line_toread])
+print("Size of spec array = ", len (spec [line_toread]))
 
-print "Time (days) = ", times [line_toread] / 86400.
+print("Time (days) = ", times [line_toread] / 86400.)
 
 iter = 0
 
 for wavelength in wavearr:
-  print wavelength, ' ', specarray [iter]
+  print(wavelength, ' ', specarray [iter])
   iter = iter + 1
 
 plt.plot (wavearr, specarray)
-plt.xlim (3000., 9000.)
-plt.savefig ('spectrum', format = 'pdf')
+plt.xlim (2000., 10000.)
+#plt.ylim(0, 2e40) 
+plt.savefig ('new_run4', format = 'pdf')
