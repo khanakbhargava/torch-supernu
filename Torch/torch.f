@@ -37,9 +37,9 @@ c       call zet47
 c       call zet76
 c       call zet127
 c       call zet200
-      call zet225
+c      call zet225
 c       call zet383
-c       call zet489
+       call zet489
 c       call zet513
 c       call zet3302
 c       call zet5
@@ -68,15 +68,6 @@ c       call zet5
                end do
               end if
              end if
-       !      convert startid to character and increment startid
-       !        startid     = startid + 1
-       !       write(idch, '(i10)') startid
-       !       idch = trim(adjustl(idch))
-       !       write(*,*), '*****************************'
-       !       write(*,*), '--------------------RUN # ',idch
-       !       write(*,*), '*****************************'
-       
-
 
 c..keep coming back to here, get the users input
 10    continue
@@ -187,8 +178,8 @@ c..output a summary of the integration, and decay the composition
 
        call net_decay_abund(xout)
 
-       call net_summary(tstep,tin,din,ein,tout,dout,eout,conserv,
-     1                  nbad,nok,xout)
+c       call net_summary(tstep,tin,din,ein,tout,dout,eout,conserv,
+c     1                  nbad,nok,xout)
 
 
       call zsecond(timtot)
@@ -250,7 +241,7 @@ c..for the integration driver
       double precision stptry,stpmin,tend,ys2(abignet*nzmax),
      1                 odescal,tol
       parameter        (tol     = 1.0d-6, 
-     1                  odescal = 1.0d-12)
+     1                  odescal = 1.0d-5)   !1.0d-12)
 c     1                  odescal = 1.0d-12)
 
 
@@ -16691,7 +16682,7 @@ c..common block communication
 c..local variables
       character*5      cdtname
       integer          nmax,stpmax,i,ii,nstp,idt
-      parameter        (nmax = abignet*nzmax, stpmax=200000)   
+      parameter        (nmax = abignet*nzmax, stpmax=2000) !stpmax=200000)   
       double precision yscal(nmax),y(nmax),dydx(nmax),xdum(nmax),
      1                 sum,cons,t9,tau_nse,tau_qse,
      1                 x,h,hdid,hnext,tiny
@@ -16730,7 +16721,6 @@ c..here are the format statements for printouts as we integrate
      1          3(a6,1pe10.3),5(a5,1pe9.2))
 101   format(1x,1p12e10.2) 
 
-      
 
 c..initialize    
       if (ylogi  .gt. nmax) stop 'ylogi > nmax in routine netint' 
@@ -18701,11 +18691,21 @@ c..end of intermediate and strong screening if
 
 
 c..store what we got
-       h12           = max(min(h12,300.0d0),0.0d0) 
-       if (h12 .eq. 300.0d0) then
+c       h12           = max(min(h12,300.0d0),0.0d0) 
+c       if (h12 .eq. 300.0d0) then
+c        dh12dt = 0.0d0
+c        dh12dt = 0.0d0
+c       end if
+c pyconuclear fix as instructed by Frank Timmes (Pranav's edit)
+
+c store what we got
+c limit h12 to avoid the pyconuclear regime
+       h12           = max(min(h12,30.0d0),0.0d0)
+       if (h12 .eq. 30.0d0) then
         dh12dt = 0.0d0
-        dh12dt = 0.0d0
+        dh12dd = 0.0d0
        end if
+
 
        scor(i)   = exp(h12) 
        scordt(i) = scor(i) * dh12dt
@@ -23278,7 +23278,7 @@ c..local variables, norder sets the order of the
 c..interpolation (2 points = linear, 3 = quadratic ...)
 
       integer          i,j,k,ntime,ntmax,jat,norder
-      parameter        (ntmax=10000, norder=2)
+      parameter        (ntmax=30000, norder=2)
       double precision ztime(ntmax),zden(ntmax),ztemp(ntmax),dy,sum,
      1                 abar,zbar,wbar,ye_orig,xcess
 
@@ -23365,7 +23365,9 @@ c..locate and interpolate to get the temperature and density
 c..bound the temperature, since a lot of rates go nuts
 c..above t9=10
 
-      temp = max(1.0d7,min(temp,1.0d10))
+       temp = max(5.0d8,min(temp,1.0d10))
+
+c      temp = max(1.0d7,min(temp,1.0d10))
 
       return
       end   
@@ -34145,7 +34147,7 @@ c..general options
 
 c..printing information
       iprint_files  = 1
-      iprint_screen = 1
+      iprint_screen = 0
 
 
 c..inititailize the burn type logicals
