@@ -1,3 +1,5 @@
+#This script calculate the relative change in velocty for all particles at two given times. Note, this script only works for the Flash runs that do not lose any particles. 
+
 import h5py
 import math
 import glob
@@ -69,7 +71,6 @@ p_file.close()
 for p in range(nparticles):
     history = "tempdens" + str(p+1) + ".dat"
     with open(history, 'w') as d:
-       d.write('%d' %(p+1))
        np.savetxt(d,np.c_[time[p],temp[p],dens[p],vel_x[p],\
           vel_y[p],vel[p]], fmt='%1.5e %1.5e %1.5e %1.5e %1.5e %1.5e')
        d.write('\n')
