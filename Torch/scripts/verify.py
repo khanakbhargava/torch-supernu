@@ -1,5 +1,3 @@
-##This code will read the isotopic abundances and convert it to chemical abundances
-
 import numpy as np
 
 nfiles = 9992 #Total number of particles
@@ -71,3 +69,4 @@ r2 = Ni/Fe
 r3 = Cr/Fe
 
 print(r1,r2,r3)
+
