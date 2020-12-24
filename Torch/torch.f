@@ -178,8 +178,8 @@ c..output a summary of the integration, and decay the composition
 
        call net_decay_abund(xout)
 
-c       call net_summary(tstep,tin,din,ein,tout,dout,eout,conserv,
-c     1                  nbad,nok,xout)
+       call net_summary(tstep,tin,din,ein,tout,dout,eout,conserv,
+     1                  nbad,nok,xout)
 
 
       call zsecond(timtot)
@@ -16668,7 +16668,7 @@ c..kount    = total number of steps taken
 
 c..declare the pass
       external         derivs,jakob,bjakob,steper 
-      integer          ylogi,nok,nbad,kount, startid
+      integer          ylogi,nok,nbad,kount,kount1, startid
       double precision start,stptry,stpmin,stopp,bc(ylogi),eps,
      1                 odescal
 
@@ -16792,11 +16792,13 @@ c       end if
 
 
 c..store intermediate results    
-       kount         = kount+1   
-
+       kount         = kount+1
+c      write(*,*) 'This is count',kount1
 
 c..detailed file print
-       if (iprint_files .eq. 1) call net_output(kount,x,y,derivs)
+       if (iprint_files .eq. 1)
+     1        call net_output(kount,x,y,derivs)
+c              kount1 = kount1 + 1
 
 c..screen print
        if (iprint_screen .eq. 1) then 
@@ -22571,10 +22573,10 @@ c..logical unit 41 records the thermodynamics
 
         else if (trho_hist) then
          call update2(zero,tdum,ddum) 
-         write(40,07) 'trho_hist:','  mass interior =',mint,
-     1                             '  shell mass =',mshell
-         write(41,07) 'trho_hist:',' mass interior =',mint,
-     1                             '  shell mass =',mshell
+c         write(40,07) 'trho_hist:','  mass interior =',mint,
+c     1                             '  shell mass =',mshell
+c         write(41,07) 'trho_hist:',' mass interior =',mint,
+c     1                             '  shell mass =',mshell
 
         else if (pt_hist) then
          call update3(zero,tdum,pdum) 
@@ -22733,8 +22735,8 @@ c..open the output file
 
         else if (trho_hist) then
          call update2(zero,tdum,ddum) 
-         write((ilop+41),07) 'trho_hist:','  mass interior =',mint,
-     1                             '  shell mass =',mshell
+c         write((ilop+41),07) 'trho_hist:','  mass interior =',mint,
+c     1                             '  shell mass =',mshell
 
         else if (pt_hist) then
          call update3(zero,tdum,ddum) 
@@ -23278,7 +23280,7 @@ c..local variables, norder sets the order of the
 c..interpolation (2 points = linear, 3 = quadratic ...)
 
       integer          i,j,k,ntime,ntmax,jat,norder
-      parameter        (ntmax=30000, norder=2)
+      parameter        (ntmax=40000, norder=2)
       double precision ztime(ntmax),zden(ntmax),ztemp(ntmax),dy,sum,
      1                 abar,zbar,wbar,ye_orig,xcess
 
@@ -23325,7 +23327,7 @@ c for slab
 c        read(17,*,end=10) ztime(i),x,zden(i),x,x,x,x,x,x,
 c     1      x,x,x,x,x,ztemp(i),x,x,x,x
 c for star
-       read(17,*,end=10) ztime(i), ztemp(i), zden(i)
+       read(17,*,end=10) ztime(i), ztemp(i), zden(i), x,x
         ntime = ntime + 1
        enddo
        stop 'more than ntmax points in update2'
@@ -35521,6 +35523,7 @@ c..declare
       parameter        (safe1 = 0.25d0, safe2 = 0.7d0, redmax=1.0d-7,
      1                  redmin = 0.1d0, tiny = 1.0d-30, 
      2                  scalmx = 0.5d0)
+
 c     2                  scalmx = 0.5d0)
 c     2                  scalmx = 0.3d0)
 c     2                  scalmx = 0.2d0)
