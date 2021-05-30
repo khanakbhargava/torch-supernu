@@ -241,7 +241,7 @@ c..for the integration driver
       double precision stptry,stpmin,tend,ys2(abignet*nzmax),
      1                 odescal,tol
       parameter        (tol     = 1.0d-6, 
-     1                  odescal = 1.0d-5)   !1.0d-12)
+     1                  odescal = 1.0d-5)  !kb  !1.0d-12)
 c     1                  odescal = 1.0d-12)
 
 
@@ -16682,7 +16682,7 @@ c..common block communication
 c..local variables
       character*5      cdtname
       integer          nmax,stpmax,i,ii,nstp,idt
-      parameter        (nmax = abignet*nzmax, stpmax=2000) !stpmax=200000)   
+      parameter        (nmax = abignet*nzmax, stpmax= 200000  !stpmax=2000 kb) !stpmax=200000)   
       double precision yscal(nmax),y(nmax),dydx(nmax),xdum(nmax),
      1                 sum,cons,t9,tau_nse,tau_qse,
      1                 x,h,hdid,hnext,tiny
@@ -17221,6 +17221,8 @@ c..set the burn type logical
       screen_on=0
       use_tables=0
       weak_on=1
+      nse_analysis = 0
+      allow_nse_evol = 0
 
 c..general options
  11   write(6,*) 
@@ -17384,10 +17386,10 @@ c..get the composition
        xneut = 0
        xh1   = 0
        xhe4  = 0
-       xc12  = 0.5
+       xc12  = 0.5 !kb
        xc13  = 0
        xn14  = 0
-       xo16  = 0.5
+       xo16  = 0.5 !kb
        xne20 = 0
        xne22 = 0
        xsi28 = 0
@@ -18706,7 +18708,7 @@ c limit h12 to avoid the pyconuclear regime
        if (h12 .eq. 30.0d0) then
         dh12dt = 0.0d0
         dh12dd = 0.0d0
-       end if
+       end if !kb
 
 
        scor(i)   = exp(h12) 
@@ -23280,7 +23282,7 @@ c..local variables, norder sets the order of the
 c..interpolation (2 points = linear, 3 = quadratic ...)
 
       integer          i,j,k,ntime,ntmax,jat,norder
-      parameter        (ntmax=40000, norder=2)
+      parameter        (ntmax=40000, norder=2) !increased ntmax kb
       double precision ztime(ntmax),zden(ntmax),ztemp(ntmax),dy,sum,
      1                 abar,zbar,wbar,ye_orig,xcess
 
@@ -23367,7 +23369,7 @@ c..locate and interpolate to get the temperature and density
 c..bound the temperature, since a lot of rates go nuts
 c..above t9=10
 
-       temp = max(5.0d8,min(temp,1.0d10))
+       temp = max(5.0d8,min(temp,2.0d10)) !kb increased ceil for hot_env
 
 c      temp = max(1.0d7,min(temp,1.0d10))
 
