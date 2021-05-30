@@ -17221,6 +17221,7 @@ c..set the burn type logical
       screen_on=0
       use_tables=0
       weak_on=1
+      ffn_on = 0    !kb
       nse_analysis = 0
       allow_nse_evol = 0
 
