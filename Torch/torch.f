@@ -16682,7 +16682,7 @@ c..common block communication
 c..local variables
       character*5      cdtname
       integer          nmax,stpmax,i,ii,nstp,idt
-      parameter        (nmax = abignet*nzmax, stpmax= 200000)  !stpmax=2000 kb) !stpmax=200000)   
+      parameter        (nmax = abignet*nzmax, stpmax= 2000)  !stpmax=2000 kb) !stpmax=200000)   
       double precision yscal(nmax),y(nmax),dydx(nmax),xdum(nmax),
      1                 sum,cons,t9,tau_nse,tau_qse,
      1                 x,h,hdid,hnext,tiny
@@ -17012,8 +17012,15 @@ c        write(6,*) stopp
          bc(i) = y(i)  
         enddo
 
-        kount = kount+1   
+        kount = kount+1  
 
+c...to check whether or not stpmax was enough to process
+c...trajectories till final time  
+        if(kount .eq. stpmax+1) then !kb
+         if(x .ne. stopp) then
+          stop 'increase stpmax'
+         endif
+        endif
 
 c..detailed file print
         if (iprint_files .eq. 1) call net_output(kount,x,y,derivs)
