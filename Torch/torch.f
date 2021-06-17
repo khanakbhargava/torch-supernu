@@ -33,6 +33,9 @@ c..for density and temperature loops
 c..initialize the network 
       write(6,*) 'reading isotope data from bdat'
 
+c..these networks are significantly different from one another
+c..513 only has 441 isotopes
+c..for more options search 'iso_search'
 c       call zet47
 c       call zet76
 c       call zet127
@@ -46,6 +49,8 @@ c       call zet5
 
 
       call init_torch
+
+c..this is where the modification for looping torch starts !kbhargava
 
       if(loop .eq. 0) then
            narg = command_argument_count()
@@ -75,6 +80,8 @@ c..keep coming back to here, get the users input
       init = 0
       write(idch, '(i10)') startid
       idch = trim(adjustl(idch))
+c..idch is the number of particle/trajectory is being processed
+!kbhargava
       write(*,*), '*****************************'
       write(*,*), '--------------------RUN # ',idch
       write(*,*), '*****************************'
@@ -198,6 +205,7 @@ c        enddo
 c       enddo
 c       close(unit=44)
 
+c..this is where looping ends !kbhargava
       startid = startid + 1
       if(startid .gt. stopid) then
        stop 'normal termination'
@@ -241,7 +249,7 @@ c..for the integration driver
       double precision stptry,stpmin,tend,ys2(abignet*nzmax),
      1                 odescal,tol
       parameter        (tol     = 1.0d-6, 
-     1                  odescal = 1.0d-5)  !kb  !1.0d-12)
+     1                  odescal = 1.0d-5)  !kbargava  !1.0d-12)
 c     1                  odescal = 1.0d-12)
 
 
@@ -16682,7 +16690,7 @@ c..common block communication
 c..local variables
       character*5      cdtname
       integer          nmax,stpmax,i,ii,nstp,idt
-      parameter        (nmax = abignet*nzmax, stpmax= 2000)  !stpmax=2000 kb) !stpmax=200000)   
+      parameter        (nmax = abignet*nzmax, stpmax= 200000) !stpmax=2000) kbhargava  
       double precision yscal(nmax),y(nmax),dydx(nmax),xdum(nmax),
      1                 sum,cons,t9,tau_nse,tau_qse,
      1                 x,h,hdid,hnext,tiny
@@ -17016,9 +17024,9 @@ c        write(6,*) stopp
 
 c...to check whether or not stpmax was enough to process
 c...trajectories till final time  
-        if(kount .eq. stpmax+1) then !kb
+        if(kount .eq. stpmax+1) then !kbargava
          if(x .ne. stopp) then
-          stop 'increase stpmax'
+          stop 'Increase stpmax in subroutine burner'
          endif
         endif
 
@@ -17222,15 +17230,6 @@ c..set the burn type logical
       else
        goto 10
       end if
-
-
-
-      screen_on=0
-      use_tables=0
-      weak_on=1
-      ffn_on = 0    !kb
-      nse_analysis = 0
-      allow_nse_evol = 0
 
 c..general options
  11   write(6,*) 
@@ -22506,12 +22505,16 @@ c..for nse
 
       double precision xnse,xnsqe
 
-
+c..changes here by sneopane to ensure all isotopes are written in the
+c..same file !kbhargava
+ 
 c..popular format statements
-01    format(1x,'*',t13,a,t33,a,t47,a,t61,a,t75,a,t89,a,   
-     1              t103,a,t117,a,t131,a,t145,a,t159,a)
-03    format(a30,i4.4,a2,i8,a)
-04    format(1x,i6,1pe20.12,1p15e14.6)
+!01    format(1x,'*',t13,a,t33,a,t47,a,t61,a,t75,a,t89,a,   
+!     1              t103,a,t117,a,t131,a,t145,a,t159,a)
+01    format (7x, a24, 1000a24) !sneopane: change 1000 if using larger-network
+03    format(a30,i4.4,a2,i8,a) 
+!04    format(1x,i6,1pe20.12,1p15e14.6)
+04    format(1x,i6,1pe24.12,1p1000e24.6)  !sneopane: same as above,change 1000
 05    format(1x,i6,1pe20.12,1p12e14.6)
 07    format(1x,'* ',a,4(a,1pe11.3))
 08    format(1x,i6,1p3e24.16,1p10e14.6)
@@ -22540,9 +22543,8 @@ c..logical unit 41 records the thermodynamics
         call sqeeze(string)
         open (unit=41, file=string, status='unknown')
 
-
-         write(40,01) adat,atim
-         write(41,01) adat,atim
+         !write(40,01) adat,atim
+         !write(41,01) adat,atim !sneopane
 
         if (one_step) then
          write(40,07) 'one_step:','  btemp=',btemp,' bden=',bden
@@ -22596,13 +22598,18 @@ c     1                             '  shell mass =',mshell
      1                             '  shell mass =',mshell
         end if
 
-
+c..Since we looped torch over multiple trajectories
+c..it caused multiple prints of headers after every time step
+c..To avoid it, we can use if condition to make sure headers
+c..are printed only when writing first time step of trajectory
+! sneopane: only one header
+        if (kount .eq. 1) then
         write(40,01) 'time','temp','den','ener','sdot','sneut',
      1               's-snu','ye','1-sum'
 
         write(41,01) 'time','pos','vel','temp','den','pres','ener',
      1               'entr','cs'
-
+        endif
 
 
 c..write the cj solution for detonation
@@ -22701,22 +22708,32 @@ c..for every spatial zone
         kk = neqs*(k-1)
 
 
+c..Continuation of writing all isotopes in one file
+!kbhargava
 c..write out the isotopic mass fractions in blocks of 8
 c..lop is how many groups of 8 exist; jrem is the remainder
-        lop  = ionmax/8
-        jrem  = ionmax - 8*lop
-        do ilop = 1,lop+1
-         kb = 1 + 8*(ilop-1)
-         ke = 8 + 8*(ilop-1)
-         if (ilop .eq. lop+1  .and. jrem .eq. 0) goto 50
-         if (ilop .eq. lop+1) ke = ionmax
-
+!        lop  = ionmax/8
+!        jrem  = ionmax - 8*lop
+!        do ilop = 1,lop+1
+!         kb = 1 + 8*(ilop-1)
+!         ke = 8 + 8*(ilop-1)
+!         if (ilop .eq. lop+1  .and. jrem .eq. 0) goto 50
+!         if (ilop .eq. lop+1) ke = ionmax
+! sneopane        
+        lop  = ionmax/ionmax
+        jrem  = ionmax - ionmax*lop
+         do ilop = 1,lop+1
+          kb = 1 + ionmax*(ilop-1)
+          ke = ionmax + ionmax*(ilop-1)
+          if (ilop .eq. lop+1  .and. jrem .eq. 0) goto 50
+          if (ilop .eq. lop+1) ke = ionmax
 
 c..logical unit 34 records the abundance evolution
 c..open the output file
          write(string,03) hfile,ilop+1,'_z',k,'.dat'
          call sqeeze(string)
          open (unit=(ilop+41), file=string, status='unknown')
+
 
          write((ilop+41),01) adat,atim
 
@@ -22754,8 +22771,10 @@ c     1                             '  shell mass =',mshell
      1                             '  shell mass =',mshell
 
         end if
-
+!  sneopane: only one header
+        if (kount .eq. 1) then
         write((ilop+41),01) 'time',(ionam(nn), nn=kb,ke)
+        endif
 
  50     continue
        enddo
@@ -23045,16 +23064,25 @@ c..for every spatial zone
       do k=1,max(1,nzone)
        kk = neqs*(k-1)
 
+c..Again writing all isotopes to same file !kbhargava
+
 c..write out the isotopic mass fractions in blocks of 8
 c..lop is how many groups of 8 exist; jrem is the remainder
-       lop  = ionmax/8
-       jrem  = ionmax - 8*lop
+!       lop  = ionmax/8
+!       jrem  = ionmax - 8*lop
+!       do ilop = 1,lop+1
+!        kb = 1 + 8*(ilop-1)
+!        ke = 8 + 8*(ilop-1)
+!        if (ilop .eq. lop+1  .and. jrem .eq. 0) goto 70
+!        if (ilop .eq. lop+1) ke = ionmax
+! sneopane
+       lop  = ionmax/ionmax
+       jrem  = ionmax - ionmax*lop
        do ilop = 1,lop+1
-        kb = 1 + 8*(ilop-1)
-        ke = 8 + 8*(ilop-1)
+        kb = 1 + ionmax*(ilop-1)
+        ke = ionmax + ionmax*(ilop-1)
         if (ilop .eq. lop+1  .and. jrem .eq. 0) goto 70
         if (ilop .eq. lop+1) ke = ionmax
-
 
 c..open the output file in append mode (f77) or position mode (f90)
 c..abundance evolution file
@@ -23289,8 +23317,11 @@ c..declare the pass
 c..local variables, norder sets the order of the 
 c..interpolation (2 points = linear, 3 = quadratic ...)
 
+c..Set ntmax according to total number of steps in trajectory file
+!kbhargava
+
       integer          i,j,k,ntime,ntmax,jat,norder
-      parameter        (ntmax=40000, norder=2) !increased ntmax kb
+      parameter        (ntmax=40000, norder=2) 
       double precision ztime(ntmax),zden(ntmax),ztemp(ntmax),dy,sum,
      1                 abar,zbar,wbar,ye_orig,xcess
 
@@ -23377,7 +23408,8 @@ c..locate and interpolate to get the temperature and density
 c..bound the temperature, since a lot of rates go nuts
 c..above t9=10
 
-       temp = max(5.0d8,min(temp,2.0d10)) !kb increased ceil for hot_env
+c..no need to use floor and ceiling for DD models !kbhargava
+c       temp = max(5.0d8,min(temp,2.0d10)) !kb increased ceil for hot_env
 
 c      temp = max(1.0d7,min(temp,1.0d10))
 
@@ -34148,8 +34180,9 @@ c..local variables
 
 
 c..general options
+c..we want to use weak reactions and asymmetric screening !kbhargava
       screen_on      = 1
-      use_tables     = 1
+      use_tables     = 0
       weak_on        = 1
       ffn_on         = 0
       pure_network   = 0
@@ -43333,6 +43366,7 @@ c..
 c..caution: in rath00_5.bdat the data for na18, na18, mg19, and al20 is bad.
 c..do not use these isotopes is any network with this data set.
 c..
+c..isotope networks avail !kbhargave iso_search
 c..zet47    sets up a 47  isotope network
 c..zet76    sets up a 76  isotope network
 c..zet127   sets up a 127 isotope network
