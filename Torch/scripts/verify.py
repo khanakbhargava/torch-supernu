@@ -1,3 +1,6 @@
+## This script was wiritten by sneopane to convert isotopic abundances to chemical abundances
+## We can also use it to calculate IGE ratios and total abundance of a given isotope
+
 import numpy as np
 
 nfiles = 9992 #Total number of particles
@@ -8,6 +11,7 @@ Ni = 0
 Cr = 0
 Fe = 0
 
+## USe glob in case particles were lost !kbhargava
 for f in range(nfiles):
     fname = 'out_' + str(f+1) + '_decayed.dat'
     file = open(fname,'r') #Open the file
@@ -59,10 +63,10 @@ for f in range(nfiles):
     for j in range(nelements):   # Storing all the  elements
         all_mass_fraction[j] = sum(mass_fraction_array[j])
 
-    Mn =+ all_mass_fraction[24] #Summing over Mn abundance for all particles
-    Ni =+ all_mass_fraction[27] #Summing over Ni abundance for all particles
-    Cr =+ all_mass_fraction[23] #Summing over Cr abundance for all particles
-    Fe =+ all_mass_fraction[25] #Summing over Fe abundance for all particles
+    Mn = Mn + all_mass_fraction[24] #Summing over Mn abundance for all particles
+    Ni = Ni + all_mass_fraction[27] #Summing over Ni abundance for all particles
+    Cr = Cr + all_mass_fraction[23] #Summing over Cr abundance for all particles
+    Fe = Fe + all_mass_fraction[25] #Summing over Fe abundance for all particles
    
 r1 = Mn/Fe
 r2 = Ni/Fe
