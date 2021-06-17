@@ -35,7 +35,7 @@ c..initialize the network
 
 c..these networks are significantly different from one another
 c..513 only has 441 isotopes
-c..for more options search 'iso_search'
+c..for more options search 'iso_search' !kbhargava
 c       call zet47
 c       call zet76
 c       call zet127
@@ -17393,10 +17393,10 @@ c..get the composition
        xneut = 0
        xh1   = 0
        xhe4  = 0
-       xc12  = 0.5 !kb
+       xc12  = 0.5 !kbhargava
        xc13  = 0
        xn14  = 0
-       xo16  = 0.5 !kb
+       xo16  = 0.5 !kbhargava
        xne20 = 0
        xne22 = 0
        xsi28 = 0
@@ -18715,7 +18715,7 @@ c limit h12 to avoid the pyconuclear regime
        if (h12 .eq. 30.0d0) then
         dh12dt = 0.0d0
         dh12dd = 0.0d0
-       end if !kb
+       end if !kbargava
 
 
        scor(i)   = exp(h12) 
