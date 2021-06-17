@@ -1,4 +1,6 @@
-### This script will read data from FLASH particle files and create '.dat' trajectory files for Torch input
+### This script will read data from FLASH particle files and 
+### create '.dat' trajectory files for Torch input
+### Each file will have 3 columns - time, temp, and dens !kbhargava
 
 import h5py
 import glob
