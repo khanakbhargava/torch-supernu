@@ -21,18 +21,18 @@ nfiles = int(sys.argv[1])  ##Added this to get the number of files to be process
 
 # Determine the no of files to be provided to each processor
 remainder = nfiles % nprocs
-print(remainder)
+#print(remainder)
 quotient = (nfiles - remainder) / nprocs
-print(quotient)
+#print(quotient)
 
 # Array of number of files for rach processor
 files_array = quotient * np.ones(nprocs)
-print(files_array)
+#print(files_array)
 
 # No of files to be read by each processor
 for j in range(remainder):
     files_array[j] = files_array[j] + 1
-print(files_array)
+#print(files_array)
 
 for i in range(int(files_array[my_rank])):
         command = "./torch -i " + str(my_rank + 1) + \
@@ -40,3 +40,5 @@ for i in range(int(files_array[my_rank])):
         print(command)
         os.system(command)
         my_rank = my_rank + nprocs
+
+MPI.Finalize

@@ -22735,7 +22735,7 @@ c..open the output file
          open (unit=(ilop+41), file=string, status='unknown')
 
 
-         write((ilop+41),01) adat,atim
+         !write((ilop+41),01) adat,atim !sneopane: not needed
 
 
         if (one_step) then
