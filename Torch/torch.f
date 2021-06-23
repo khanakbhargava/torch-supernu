@@ -34180,7 +34180,7 @@ c..local variables
 
 
 c..general options
-c..we want to use weak reactions and asymmetric screening !kbhargava
+c..we want to use weak reactions and screening !kbhargava
       screen_on      = 1
       use_tables     = 0
       weak_on        = 1
