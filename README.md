@@ -1,3 +1,4 @@
+![pipeline](https://user-images.githubusercontent.com/56127611/123207022-b9a36280-d48a-11eb-859e-0f011586129b.jpeg)
 This repository contains source codes required to run the post-processing part of the Flash-Torch-SuperNu-SNID pipeline.
 
 Instructions on how to set up Torch and SuperNu can be found here:
