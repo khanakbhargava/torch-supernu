@@ -8,7 +8,8 @@ import glob
 import numpy as np
 
 #Give path to particle files
-files = glob.glob("/work/07441/kbhargav/stampede2/puredet2/pure_det_hdf5_part_00[0-4][0-9][0-9][0-9]")
+#files = glob.glob("/work/07441/kbhargav/stampede2/puredet2/pure_det_hdf5_part_00[0-4][0-9][0-9][0-9]")
+files =glob.glob("rot_flame_det_split_highdens_hdf5_part_*")
 files.sort()
 
 #Getting total number of particles from the first file
