@@ -8,4 +8,4 @@ Detailed instrctions on how to post-process Flash data can be found here:
 
 http://novastella.org/wiki/index.php?title=FLASH_-_TORCH_-_SUPERNU_-_SNID_Pipeline  
 
-<img src="https://user-images.githubusercontent.com/56127611/123207022-b9a36280-d48a-11eb-859e-0f011586129b.jpeg" width="450" height="450">
+<img src="https://user-images.githubusercontent.com/56127611/123207022-b9a36280-d48a-11eb-859e-0f011586129b.jpeg" width="550" height="450">
