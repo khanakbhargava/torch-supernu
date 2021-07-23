@@ -17026,7 +17026,7 @@ c...to check whether or not stpmax was enough to process
 c...trajectories till final time  
         if(kount .eq. stpmax+1) then !kbargava
          if(x .ne. stopp) then
-          stop 'Increase stpmax in subroutine burner'
+          stop 'Increase stpmax in subroutine netint'
          endif
         endif
 
